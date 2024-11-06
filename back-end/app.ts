@@ -1,21 +1,24 @@
-import * as dotenv from 'dotenv';
+// src/app.ts
 import express from 'express';
+import teamRoutes from './routes/teamRoutes';
+import { setupSwagger } from './swagger';
 import cors from 'cors';
-import * as bodyParser from 'body-parser';
-import swaggerJSDoc from 'swagger-jsdoc';
-import swaggerUi from 'swagger-ui-express';
+
 
 const app = express();
-dotenv.config();
-const port = process.env.APP_PORT || 3000;
+app.use(express.json());
 
-app.use(cors());
-app.use(bodyParser.json());
+app.use(cors()); // Enables CORS for all origins
 
-app.get('/status', (req, res) => {
-    res.json({ message: 'Back-end is running...' });
+// Use the team routes
+app.use('/api', teamRoutes);
+
+// Set up Swagger documentation
+setupSwagger(app);
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
 
-app.listen(port || 3000, () => {
-    console.log(`Back-end is running on port ${port}.`);
-});
+export default app;
