@@ -1,44 +1,28 @@
 // components/TeamList.tsx
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { getTeams } from '@/service/teamService';
 
 interface TeamListProps {
+  teams: any[];
   onSelectTeam: (id: string) => void;
 }
 
-const TeamList: React.FC<TeamListProps> = ({ onSelectTeam }) => {
-  const [teams, setTeams] = useState<any[]>([]);
-
-  useEffect(() => {
-    fetchTeams();
-  }, []);
-
-  const fetchTeams = async () => {
-    try {
-      const response = await getTeams();
-      setTeams(response.data || []);
-    } catch (error) {
-      console.error("Error fetching teams:", error);
-      setTeams([]);
-    }
-  };
-
+const TeamList: React.FC<TeamListProps> = ({ teams, onSelectTeam }) => {
   return (
-    <div>
-      <h2>Teams</h2>
+    <div className="max-w-lg mx-auto p-4 bg-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-4">Teams</h2>
       {teams.length > 0 ? (
         teams.map((team) => (
-          <div key={team.id}>
+          <div key={team.id} className="bg-gray-100 p-3 rounded mb-2 shadow-sm">
             <Link href={`/teamManagement/${team.id}`}>
-              <h1 onClick={() => onSelectTeam(team.id)}>
-                <h3>{team.name}</h3>
-              </h1>
+              <h4 className="text-lg font-semibold hover:underline" onClick={() => onSelectTeam(team.id)}>
+                {team.name}
+              </h4>
             </Link>
           </div>
         ))
       ) : (
-        <p>No teams available.</p>
+        <p className="text-gray-500">No teams available.</p>
       )}
     </div>
   );

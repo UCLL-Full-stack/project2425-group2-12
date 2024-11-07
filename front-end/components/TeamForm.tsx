@@ -2,30 +2,31 @@
 import { createTeam } from '@/service/teamService';
 import React, { useState } from 'react';
 
-const TeamForm = ({ onTeamCreated }: { onTeamCreated: () => void }) => {
+interface TeamFormProps {
+  onTeamCreated: () => void; // Callback to refresh team list
+}
+
+const TeamForm: React.FC<TeamFormProps> = ({ onTeamCreated }) => {
   const [teamName, setTeamName] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreateTeam = async () => {
     if (teamName) {
-      await createTeam(teamName);
-      setTeamName('');
-      onTeamCreated(); // Notify parent to refresh the team list
+      await createTeam(teamName); // Create the team
+      setTeamName(''); // Clear input after team is created
+      onTeamCreated(); // Refresh the team list
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label>Team Name:</label>
+    <div>
       <input
         type="text"
         value={teamName}
         onChange={(e) => setTeamName(e.target.value)}
         placeholder="Enter team name"
-        required
       />
-      <button type="submit">Create Team</button>
-    </form>
+      <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded"  onClick={handleCreateTeam}>Create Team</button>
+    </div>
   );
 };
 

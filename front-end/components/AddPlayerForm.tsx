@@ -19,24 +19,42 @@ const AddPlayerForm = ({ teamId, onPlayerAdded }: { teamId: string; onPlayerAdde
   };
 
   return (
-    <form onSubmit={handleAddPlayer}>
-      <label>Player Name:</label>
-      <input
-        type="text"
-        value={playerName}
-        onChange={(e) => setPlayerName(e.target.value)}
-        placeholder="Enter player name"
-        required
-      />
-      <label>Role:</label>
-      <select value={role} onChange={(e) => setRole(e.target.value)} required>
-        <option value="">Select Role</option>
-        <option value="Batsman">Batsman</option>
-        <option value="Bowler">Bowler</option>
-        <option value="All-rounder">All-rounder</option>
-        <option value="Wicket Keeper">Wicket Keeper</option>
-      </select>
-      <button type="submit">Add Player</button>
+    <form onSubmit={handleAddPlayer} className="space-y-4 bg-gray-100 p-4 rounded-lg shadow-md">
+      <div>
+        <label className="block text-sm font-semibold mb-1">Player Name:</label>
+        <input
+          type="text"
+          className="w-full p-2 border border-gray-300 rounded-lg"
+          value={playerName}
+          onChange={(e) => setPlayerName(e.target.value)}
+          placeholder="Enter player name"
+          required
+        />
+      </div>
+      
+      <div>
+        <label className="block text-sm font-semibold mb-1">Role:</label>
+        <select
+          className="w-full p-2 border border-gray-300 rounded-lg"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          required
+        >
+          <option value="">Select Role</option>
+          <option value="Batsman">Batsman</option>
+          <option value="Bowler">Bowler</option>
+          <option value="All-rounder">All-rounder</option>
+          <option value="Wicket Keeper">Wicket Keeper</option>
+          <option value="Captain">Captain</option>
+        </select>
+      </div>
+      
+      <button
+        type="submit"
+        className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 rounded-lg"
+      >
+        Add Player
+      </button>
     </form>
   );
 };

@@ -31,8 +31,14 @@ export function createTeamController(req: Request, res: Response): void {
     return;
   }
 
-  const team = createTeam(name);
-  res.status(201).json(team);
+  const newTeam = {
+    id: (teamsData.length + 1).toString(), // Example for unique ID generation
+    name,
+    players: [],
+  };
+
+  teamsData.push(newTeam); // Add the new team to the shared array
+  res.status(201).json(newTeam); // Return the new team as a response
 }
 
 /**
@@ -74,13 +80,15 @@ export function addPlayerController(req: Request, res: Response): void {
     return;
   }
 
-  const player = addPlayerToTeam(teamId, name, role);
-  if (!player) {
+  const team = teamsData.find((t) => t.id === teamId);
+  if (!team) {
     res.status(404).json({ message: 'Team not found' });
     return;
   }
 
-  res.status(201).json(player);
+  const newPlayer = { id: (team.players.length + 1).toString(), name, role };
+  team.players.push(newPlayer);
+  res.status(201).json(newPlayer);
 }
 
 /**
@@ -110,12 +118,19 @@ export function addPlayerController(req: Request, res: Response): void {
 export function removePlayerController(req: Request, res: Response): void {
   const { teamId, playerId } = req.params;
 
-  const success = removePlayerFromTeam(teamId, playerId);
-  if (!success) {
-    res.status(404).json({ message: 'Team or Player not found' });
+  const team = teamsData.find((t) => t.id === teamId);
+  if (!team) {
+    res.status(404).json({ message: 'Team not found' });
     return;
   }
 
+  const playerIndex = team.players.findIndex((p) => p.id === playerId);
+  if (playerIndex === -1) {
+    res.status(404).json({ message: 'Player not found' });
+    return;
+  }
+
+  team.players.splice(playerIndex, 1); // Remove player from the array
   res.status(200).json({ message: 'Player removed successfully' });
 }
 
@@ -158,25 +173,52 @@ export function getTeamPlayersController(req: Request, res: Response): void {
 }
 
 
-export const getTeams = (req: Request, res: Response) => {
-  const dummyTeams = [
-    {
-      id: '1',
-      name: 'Team A',
-      players: [
-        { id: '1', name: 'Player 1', role: 'Batsman' },
-        { id: '2', name: 'Player 2', role: 'Bowler' },
-      ],
-    },
-    {
-      id: '2',
-      name: 'Team B',
-      players: [
-        { id: '3', name: 'Player 3', role: 'All-rounder' },
-        { id: '4', name: 'Player 4', role: 'Wicket Keeper' },
-      ],
-    },
-  ];
+const teamsData = [
+  {
+    id: '1',
+    name: 'Team A',
+    players: [
+      { id: '1', name: 'Player 1', role: 'Batsman' },
+      { id: '2', name: 'Player 2', role: 'Bowler' },
+    ],
+  },
+  {
+    id: '2',
+    name: 'Team B',
+    players: [
+      { id: '3', name: 'Player 3', role: 'All-rounder' },
+      { id: '4', name: 'Player 4', role: 'Wicket Keeper' },
+    ],
+  },
+];
 
-  res.json(dummyTeams); // Send the dummy data as the response
+
+export const getTeams = (req: Request, res: Response) => {
+  res.json(teamsData); // Return the current list of teams
 };
+
+
+export function updatePlayerController(req: Request, res: Response): void {
+  const { teamId, playerId } = req.params;
+  const { role } = req.body;
+
+  if (!role) {
+    res.status(400).json({ message: 'Player role is required' });
+    return;
+  }
+
+  const team = teamsData.find((t) => t.id === teamId);
+  if (!team) {
+    res.status(404).json({ message: 'Team not found' });
+    return;
+  }
+
+  const player = team.players.find((p) => p.id === playerId);
+  if (!player) {
+    res.status(404).json({ message: 'Player not found' });
+    return;
+  }
+
+  player.role = role;
+  res.status(200).json({ message: 'Player role updated successfully', player });
+}
