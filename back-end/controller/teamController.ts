@@ -1,7 +1,12 @@
 // src/controller/teamController.ts
 import { Request, Response } from 'express';
-import { createTeam, addPlayerToTeam, removePlayerFromTeam, getTeamPlayers } from '../service/teamService';
-import { CreateTeamDTO, AddPlayerDTO } from '../types';
+import { createTeam, addPlayerToTeam, removePlayerFromTeam, getTeamPlayers,  handleJoinRequest,   getJoinRequests,} from '../service/teamService';
+import { CreateTeamDTO, AddPlayerDTO , JoinRequest} from '../types';
+import { joinRequests, teams } from '../model/dataStore';
+import { PlayerEntity } from '../model/Player';
+import { TeamEntity } from '../model/Team';
+
+
 
 /**
  * @swagger
@@ -31,13 +36,14 @@ export function createTeamController(req: Request, res: Response): void {
     return;
   }
 
-  const newTeam = {
-    id: (teamsData.length + 1).toString(), // Example for unique ID generation
+  // Create a new TeamEntity instance
+  const newTeam = new TeamEntity(
+    (teams.length + 1).toString(),
     name,
-    players: [],
-  };
+    [] // Start with an empty players array
+  );
 
-  teamsData.push(newTeam); // Add the new team to the shared array
+  teams.push(newTeam); // Add the new team to the array
   res.status(201).json(newTeam); // Return the new team as a response
 }
 
@@ -80,16 +86,25 @@ export function addPlayerController(req: Request, res: Response): void {
     return;
   }
 
-  const team = teamsData.find((t) => t.id === teamId);
+  const team = teams.find((t) => t.id === teamId);
   if (!team) {
     res.status(404).json({ message: 'Team not found' });
     return;
   }
 
-  const newPlayer = { id: (team.players.length + 1).toString(), name, role };
-  team.players.push(newPlayer);
+  // Use PlayerEntity constructor
+  const newPlayer = new PlayerEntity(
+    (team.players.length + 1).toString(),
+    name,
+    role,
+    teamId // Include teamId
+  );
+
+  team.players.push(newPlayer); // Push the PlayerEntity instance
   res.status(201).json(newPlayer);
 }
+
+
 
 /**
  * @swagger
@@ -118,7 +133,7 @@ export function addPlayerController(req: Request, res: Response): void {
 export function removePlayerController(req: Request, res: Response): void {
   const { teamId, playerId } = req.params;
 
-  const team = teamsData.find((t) => t.id === teamId);
+  const team = teams.find((t) => t.id === teamId);
   if (!team) {
     res.status(404).json({ message: 'Team not found' });
     return;
@@ -173,28 +188,11 @@ export function getTeamPlayersController(req: Request, res: Response): void {
 }
 
 
-const teamsData = [
-  {
-    id: '1',
-    name: 'Team A',
-    players: [
-      { id: '1', name: 'Player 1', role: 'Batsman' },
-      { id: '2', name: 'Player 2', role: 'Bowler' },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Team B',
-    players: [
-      { id: '3', name: 'Player 3', role: 'All-rounder' },
-      { id: '4', name: 'Player 4', role: 'Wicket Keeper' },
-    ],
-  },
-];
+
 
 
 export const getTeams = (req: Request, res: Response) => {
-  res.json(teamsData); // Return the current list of teams
+  res.json(teams); // Return the current list of teams
 };
 
 
@@ -207,7 +205,7 @@ export function updatePlayerController(req: Request, res: Response): void {
     return;
   }
 
-  const team = teamsData.find((t) => t.id === teamId);
+  const team = teams.find((t) => t.id === teamId);
   if (!team) {
     res.status(404).json({ message: 'Team not found' });
     return;
@@ -221,4 +219,139 @@ export function updatePlayerController(req: Request, res: Response): void {
 
   player.role = role;
   res.status(200).json({ message: 'Player role updated successfully', player });
+}
+
+/**
+ * @swagger
+ * /api/teams/{teamId}/join:
+ *   post:
+ *     summary: Request to join a team
+ *     parameters:
+ *       - in: path
+ *         name: teamId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the team
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/JoinRequestDTO'
+ *     responses:
+ *       201:
+ *         description: Join request submitted successfully
+ *       404:
+ *         description: Team not found
+ */
+
+
+
+export function requestJoinTeamController(req: Request, res: Response): void {
+  const { teamId } = req.params;
+  const { playerId, playerName } = req.body as JoinRequest;
+
+  
+  // Access teamsData directly in the controller
+  const team = teams.find((t) => t.id === teamId);
+  if (!team) {
+    res.status(404).json({ message: 'Team not found' });
+    return;
+  }
+
+  const newRequest: JoinRequest = {
+    id: (joinRequests.length + 1).toString(), // Generate unique ID
+    playerId,
+    playerName,
+    teamId,
+    status: 'pending',
+  };
+
+  joinRequests.push(newRequest);
+
+  res.status(201).json({ message: 'Join request submitted successfully', request: newRequest });
+}
+/**
+ * @swagger
+ * /api/teams/{teamId}/requests/{requestId}:
+ *   patch:
+ *     summary: Approve or deny a join request
+ *     parameters:
+ *       - in: path
+ *         name: teamId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the team
+ *       - in: path
+ *         name: requestId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the join request
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [approved, denied]
+ *                 description: Status of the join request
+ *     responses:
+ *       200:
+ *         description: Join request handled successfully
+ *       404:
+ *         description: Team or join request not found
+ */
+export function handleJoinRequestController(req: Request, res: Response): void {
+  const { teamId, requestId } = req.params;
+  const { status } = req.body;
+
+  const success = handleJoinRequest(teamId, requestId, status);
+  if (!success) {
+    res.status(404).json({ message: 'Team or join request not found' });
+    return;
+  }
+
+  res.status(200).json({ message: `Join request ${status}` });
+}
+
+/**
+ * @swagger
+ * /api/teams/{teamId}/requests:
+ *   get:
+ *     summary: Get all join requests for a team
+ *     parameters:
+ *       - in: path
+ *         name: teamId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the team
+ *     responses:
+ *       200:
+ *         description: List of join requests
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/JoinRequestDTO'
+ *       404:
+ *         description: Team not found
+ */
+export function getJoinRequestsController(req: Request, res: Response): void {
+  const { teamId } = req.params;
+
+  const requests = getJoinRequests(teamId);
+  if (!requests) {
+    res.status(404).json({ message: 'Team not found' });
+    return;
+  }
+
+  res.status(200).json(requests);
 }

@@ -23,3 +23,23 @@ export const updatePlayerRole = async (teamId: string, playerId: string, role: s
   return axios.patch(`${API_URL}/teams/${teamId}/players/${playerId}`, { role });
 };
 
+// services/teamService.ts
+export const requestJoinTeam = async (teamId: string, playerId: string, playerName: string) => {
+  return axios.post(`${API_URL}/teams/${teamId}/join`, {
+    playerId,
+    playerName,
+  });
+};
+
+
+
+export const getJoinRequests = async (teamId: string) => {
+  return axios.get(`${API_URL}/teams/${teamId}/requests`);
+};
+
+export const handleJoinRequest = async (teamId: string, requestId: string, status: string) => {
+  return axios.patch(`${API_URL}/teams/${teamId}/requests/${requestId}`, { status });
+};
+
+
+

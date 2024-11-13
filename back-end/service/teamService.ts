@@ -1,7 +1,8 @@
 // src/service/teamService.ts
-import { teams } from '../model/dataStore';
+import { joinRequests, teams } from '../model/dataStore';
 import { TeamEntity } from '../model/Team';
 import { PlayerEntity } from '../model/Player';
+import { JoinRequest } from '../types';
 
 // Utility functions to generate IDs
 function generateTeamId(): string {
@@ -24,17 +25,29 @@ export function createTeam(name: string): TeamEntity {
   return newTeam;
 }
 
+
 // Function to add a player to a team
-export function addPlayerToTeam(teamId: string, playerName: string, role: 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicket Keeper'): PlayerEntity | null {
-  const team = teams.find((t) => t.id === teamId) as TeamEntity | undefined;
+export function addPlayerToTeam(
+  teamId: string,
+  playerName: string,
+  role: 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicket Keeper'
+): PlayerEntity | null {
+  const team = teams.find((t) => t.id === teamId);
   if (!team) {
     return null; // Team not found
   }
 
-  const newPlayer = new PlayerEntity(generatePlayerId(), playerName, role, team.id);
+  const newPlayer = new PlayerEntity(
+    generatePlayerId(),
+    playerName,
+    role,
+    team.id // Include teamId
+  );
+
   team.players.push(newPlayer);
   return newPlayer;
 }
+
 
 // Function to remove a player from a team
 export function removePlayerFromTeam(teamId: string, playerId: string): boolean {
@@ -61,3 +74,37 @@ export function getTeamPlayers(teamId: string): PlayerEntity[] | null {
 
   return team.players;
 }
+
+
+
+
+// Function to handle join requests
+export const handleJoinRequest = (teamId: string, requestId: string, status: 'approved' | 'denied'): boolean => {
+  const request = joinRequests.find((r) => r.id === requestId && r.teamId === teamId);
+  if (!request || request.status !== 'pending') {
+    return false; // Request not found or already handled
+  }
+
+  request.status = status;
+
+  if (status === 'approved') {
+    const team = teams.find((t) => t.id === teamId);
+    if (team) {
+      const newPlayer: PlayerEntity = new PlayerEntity(
+        request.playerId,
+        request.playerName,
+        'Batsman', // Assign a default role
+        teamId
+      );
+      team.players.push(newPlayer);
+    }
+  }
+
+  return true;
+};
+
+
+// Function to get join requests for a team
+export const getJoinRequests = (teamId: string): JoinRequest[] => {
+  return joinRequests.filter((r) => r.teamId === teamId);
+};
