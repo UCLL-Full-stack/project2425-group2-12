@@ -2,6 +2,7 @@
 import { TeamEntity } from './Team';
 import { Player, PlayerEntity } from './Player';
 import { JoinRequest } from '../types';
+import { GameEntity } from './Game';
 
 // Initialize with dummy data
 export const teams: TeamEntity[] = [
@@ -16,4 +17,9 @@ export const teams: TeamEntity[] = [
 ];
 export const players: Player[] = [];
 export const joinRequests: JoinRequest[] = [];
+
+export const games: GameEntity[] = [
+  new GameEntity('1', 'Team A', 'Team B', '2024-11-23', '19:30', 'Chepauk, Chennai'),
+  new GameEntity('2', 'Team B', 'Team A', '2024-12-01', '18:00', 'Jinnah Stadium, Islamabad'),
+]
 
