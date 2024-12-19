@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  password  String
+  role      String     @default("player")
+  status    UserStatus @default(active)
+  player    Player?    @relation("UserToPlayer")
+  spectator Spectator? @relation("UserToSpectator") // Removed cascade here
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+enum UserStatus {
+  active
+  suspended
+}
+
+model Team {
+  id           String        @id @default(uuid())
+  name         String        @unique
+  players      Player[]      // Removed cascade here
+  gamesHome    Game[]        @relation("HomeTeam") 
+  gamesAway    Game[]        @relation("AwayTeam")
+  joinRequests JoinRequest[] // Removed cascade here
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Player {
+  id             String          @id @default(uuid())
+  name           String
+  role           String
+  team           Team?           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId         String?
+  user           User?           @relation("UserToPlayer", fields: [userId], references: [id], onDelete: Cascade)
+  userId         String?         @unique
+  participations Participation[] // Removed cascade here
+  joinRequests   JoinRequest[]   // Removed cascade here
+}
+
+model Game {
+  id             String          @id @default(uuid())
+  team1          Team            @relation("HomeTeam", fields: [team1Id], references: [id])
+  team1Id        String
+  team2          Team            @relation("AwayTeam", fields: [team2Id], references: [id])
+  team2Id        String
+  date           DateTime
+  time           String
+  venue          String
+  status         String          @default("Scheduled")
+  participations Participation[] @relation // Removed cascade here
+  reservations   Reservation[]   @relation // Removed cascade here
+}
+
+model Participation {
+  id       String @id @default(uuid())
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  playerId String
+  game     Game   @relation(fields: [gameId], references: [id]) // Removed cascade here
+  gameId   String
+  status   String @default("not confirmed")
+}
+model Reservation {
+  id          String    @id @default(uuid())
+  spectator   Spectator @relation(fields: [spectatorId], references: [id], onDelete: Cascade)
+  spectatorId String
+  game        Game      @relation(fields: [gameId], references: [id]) // Removed cascade here
+  gameId      String
+  status      String    @default("reserved")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+model JoinRequest {
+  id         String   @id @default(uuid())
+  playerId   String
+  player     Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  playerName String
+  teamId     String
+  team       Team     @relation(fields: [teamId], references: [id]) // Removed cascade here
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+}
+
+model Spectator {
+  id           String        @id @default(uuid())
+  name         String
+  email        String?
+  user         User?         @relation("UserToSpectator", fields: [userId], references: [id], onDelete: Cascade)
+  userId       String?       @unique
+  reservations Reservation[] // Removed cascade here
+}

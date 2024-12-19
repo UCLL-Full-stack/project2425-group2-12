@@ -1,4 +1,5 @@
 // components/AddPlayerForm.tsx
+import { PLAYER_ROLES } from '@/constants';
 import { addPlayerToTeam } from '@/service/teamService';
 import React, { useState } from 'react';
 
@@ -40,12 +41,11 @@ const AddPlayerForm = ({ teamId, onPlayerAdded }: { teamId: string; onPlayerAdde
           onChange={(e) => setRole(e.target.value)}
           required
         >
-          <option value="">Select Role</option>
-          <option value="Batsman">Batsman</option>
-          <option value="Bowler">Bowler</option>
-          <option value="All-rounder">All-rounder</option>
-          <option value="Wicket Keeper">Wicket Keeper</option>
-          <option value="Captain">Captain</option>
+       <option value="">Select Role</option>
+  {PLAYER_ROLES.map((role) => (
+    <option key={role} value={role}>
+      {role}
+    </option> ))}
         </select>
       </div>
       
