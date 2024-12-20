@@ -192,19 +192,17 @@ const TeamDetail = () => {
       setJoinRequestStatus("pending");
       alert("Join request sent successfully!");
     } catch (error: any) {
-      if (error.response) {
-        const backendMessage = error.response.data?.message;
-        if (backendMessage) {
-          alert(backendMessage); // Show backend message
-        } else {
-          alert("Failed to send join request. Please check your input and try again.");
-        }
+      if (error.response?.status === 400 && error.response?.data?.message) {
+        // Show the specific error message from the backend
+        alert(error.response.data.message);
       } else {
-        console.error("Unexpected error:", error);
-        alert("Something went wrong. Please try again later.");
+        // Handle unexpected errors
+        console.error("Error sending join request:", error);
+        alert("Failed to send join request. Please try again.");
       }
     }
   };
+  
   
 
   const handleRequestAction = async (

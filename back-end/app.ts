@@ -13,10 +13,14 @@ import { seedDatabase } from './repository/prisma/seed';
 
 import profileRoutes from './routes/profileRoutes';
 import authRoutes from './routes/authRoutes';
+import helmet from 'helmet';
 
 
 
 const app = express();
+
+app.use(helmet());
+
 
 const SHOULD_SEED = process.env.SEED_DATABASE === 'true';
 
@@ -30,6 +34,9 @@ if (process.env.NODE_ENV === "production") {
 }
 
 
+app.get('/', (req, res) => {
+  res.send('Helmet is securing HTTP headers!');
+});
 
 
 // Middleware

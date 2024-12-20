@@ -102,6 +102,7 @@ export async function getAllGamesController(req: Request, res: Response): Promis
 }
 
 
+
 /**
  * @swagger
  * /api/games/{gameId}:

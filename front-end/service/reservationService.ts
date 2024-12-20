@@ -58,8 +58,8 @@ export const cancelReservation = async (reservationId: string) => {
 
 export const getReservations = async () => {
   const token = getAuthToken();
-  const response = await axios.get(`${API_URL}/reservations`, 
-  { headers: { Authorization: `Bearer ${token}` } }
-  ); // Add auth header  )
-  return response.data.data; // Adjust based on your API response structure
+  const response = await axios.get(`${API_URL}/reservations`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data; // Ensure this matches the backend response structure
 };

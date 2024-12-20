@@ -14,6 +14,8 @@ const Navbar = () => {
     router.push('/login');
   };
 
+  
+
   return (
     <nav className="p-4 bg-gray-800 text-white flex justify-between">
    <Link href="/">
