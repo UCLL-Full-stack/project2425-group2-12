@@ -109,7 +109,7 @@ console.log("Team 2 ID:", team2.id);
       data: {
         team1Id: team1.id,
         team2Id: team2.id,
-        date: new Date('2024-12-01'),
+        date: new Date('2025-1-22'),
         time: '15:30',
         venue: 'Stadium 1',
       },

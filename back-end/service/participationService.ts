@@ -77,6 +77,8 @@ export async function confirmParticipation(playerId: string, gameId: string) {
     },
   });
 
+  
+
   return newParticipation;
 }
 

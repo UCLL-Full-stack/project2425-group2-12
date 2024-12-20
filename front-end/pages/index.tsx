@@ -30,7 +30,7 @@ export default function Home() {
       const redirectPaths: Record<string, string> = {
         admin: '/dashboard', // Admin redirect
         captain: '/teamManagement', // Captain redirect
-        player: '/teamManagement', // Player now explicitly redirected to Team Management
+        player: '/playerLanding', // Player now explicitly redirected to Team Management
         spectator: '/reservation',
       };
 

@@ -48,7 +48,7 @@ export const redirectUserBasedOnRole = (router: NextRouter) => {
   const redirectPaths: Record<string, string> = {
     admin: '/dashboard',
     captain: '/teamManagement',
-    player: '/teamManagement', // Redirect player to Team Management
+    player: '/playerLanding', // Redirect player to Team Management
     spectator: '/reservation',
   };
 

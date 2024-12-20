@@ -60,12 +60,23 @@ export const loginUserController = async (req: Request, res: Response) => {
       return res.status(403).json({ message: 'Account suspended. Please contact support.' });
     }
 
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET!,
-      { expiresIn: '1h' }
-    );
+    let playerDetails = {};
+    if (user.role === 'player') {
+      const player = await prisma.player.findUnique({ where: { userId: user.id } });
+      if (player) {
+        playerDetails = {
+          playerId: player.id,
+          playerName: player.name,
+        };
+      }
+    }
 
+    // Include player details in the JWT token if applicable
+    const token = jwt.sign(
+      { id: user.id, role: user.role, ...playerDetails },
+      process.env.JWT_SECRET!,
+      { expiresIn: '7d' }
+    );
     res.status(200).json({ token });
   } catch (error) {
     console.error('Error during login:', error);

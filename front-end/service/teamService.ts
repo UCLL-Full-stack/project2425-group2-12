@@ -123,11 +123,12 @@ export const requestJoinTeam = async (teamId: string, playerId: string, playerNa
     const token = getAuthToken();
     if (!token) throw new Error("Auth token not found.");
 
-    console.log('Sending request to join team:', { teamId, playerId, playerName });
+    console.log("Sending request to join team:", { teamId, playerId, playerName });
+
     const response = await axios.post(
       `${API_URL}/teams/${teamId}/join`,
       { playerId, playerName },
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { Authorization: `Bearer ${token}` } } // Authorization remains unchanged
     );
     return response.data;
   } catch (error) {
@@ -135,16 +136,18 @@ export const requestJoinTeam = async (teamId: string, playerId: string, playerNa
   }
 };
 
+
 export const handleJoinRequest = async(
   teamId: string,
   requestId: string,
-  status: "approved" | "denied"
+  status: "approved" | "denied",
+  role: "Batsman" | "Bowler" | "All-rounder" | "Wicket Keeper" 
 ) => {
   try {
     const token = getAuthToken();
     const response = await axios.patch(
       `${API_URL}/teams/${teamId}/requests/${requestId}`,
-      { status }, // Body
+      { status, role }, // Body
       { headers: { Authorization: `Bearer ${token}` } } // Headers
     );
     

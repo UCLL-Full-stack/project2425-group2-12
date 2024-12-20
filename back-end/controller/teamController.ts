@@ -388,8 +388,21 @@ export async function requestJoinTeamController(req: Request, res: Response): Pr
     res.status(400).json({ message: 'Player ID and name are required' });
     return;
   }
+  
 
   try {
+    // Check if the player is already in the team
+    const isPartOfTeam = await prisma.player.findFirst({
+      where: {
+        id: playerId,
+        teamId, // Ensure the player's team matches the requested team
+      },
+    });
+
+    if (isPartOfTeam) {
+      res.status(400).json({ message: 'Player is already part of this team.' });
+      return;
+    }
     const newJoinRequest = await createJoinRequest(teamId, playerId, playerName);
     res.status(201).json({
       message: 'Join request submitted successfully',
@@ -397,7 +410,9 @@ export async function requestJoinTeamController(req: Request, res: Response): Pr
     });
   } catch (error) {
     console.error('Error in requestJoinTeamController:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({
+      message: 'Something went wrong on the server. Please try again later.',
+    });
   }
 };
 

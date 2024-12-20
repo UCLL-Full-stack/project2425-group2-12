@@ -7,6 +7,7 @@ import {
   getTeamRosterController,
 } from "../controller/participationController";
 import { authorizeRoles, protect } from "../middleware/authMiddleware";
+import { validateParticipation, validateParticipationStatus } from "../middleware/validationMiddleware";
 
 /**
  * @swagger
@@ -66,10 +67,10 @@ router.get("/games/upcoming", protect, authorizeRoles('player', 'admin'), getUpc
 router.get("/games/participation/:playerId", protect, authorizeRoles('player', 'admin'), getPlayerParticipationController);
 
 // Confirm participation
-router.post("/games/participation", protect, authorizeRoles('player', 'admin'), confirmParticipationController);
+router.post("/games/participation",   validateParticipation, protect, authorizeRoles('player', 'admin'), confirmParticipationController);
 
 // Update participation status
-router.patch("/games/participation/:gameId/:playerId", protect, authorizeRoles('player', 'admin'), updateParticipationController);
+router.patch("/games/participation/:gameId/:playerId", validateParticipationStatus, protect, authorizeRoles('player', 'admin'), updateParticipationController);
 
 // Fetch team roster
 router.get("/games/:gameId/roster", protect, authorizeRoles('player', 'admin'), getTeamRosterController);

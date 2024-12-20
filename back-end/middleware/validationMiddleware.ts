@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { Request, Response, NextFunction } from 'express';
+import Joi from 'joi';
 
 const registrationSchema = z.object({
   email: z.string().email(),
@@ -28,4 +29,39 @@ export const validateRegistrationWithZod = (
     // Handle unexpected errors
     return res.status(500).json({ message: 'Internal server error' });
   }
+};
+
+export const validateParticipation = (req: Request, res: Response, next: NextFunction) => {
+  const schema = Joi.object({
+    playerId: Joi.string().required().messages({
+      "string.empty": "Player ID is required.",
+    }),
+    gameId: Joi.string().required().messages({
+      "string.empty": "Game ID is required.",
+    }),
+  });
+
+  const { error } = schema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+  next();
+};
+
+// Validate status for updateParticipation
+export const validateParticipationStatus = (req: Request, res: Response, next: NextFunction) => {
+  const schema = Joi.object({
+    status: Joi.string()
+      .valid("confirmed", "not confirmed")
+      .required()
+      .messages({
+        "any.only": "Invalid status. Allowed values are 'confirmed' or 'not confirmed'.",
+      }),
+  });
+
+  const { error } = schema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+  next();
 };

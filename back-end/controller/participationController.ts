@@ -153,20 +153,14 @@ export async function confirmParticipationController(req: Request, res: Response
   } catch (error: any) {
     if (error.message === "Game not found") {
       res.status(404).json({
-        message: `Game with ID: ${gameId} not found.`,
+        message: "The game you are trying to confirm participation in does not exist. Please check the game ID and try again.",
       });
     } else if (error.message === "Player not found") {
       res.status(404).json({
-        message: `Player with ID: ${playerId} not found.`,
-      });
-    } else {
-      res.status(500).json({
-        message: "Failed to confirm participation.",
-        error: error.message,
+        message: "The player record could not be found. Please ensure the player ID is correct.",
       });
     }
-  }
-}
+  }}    
 
 /**
  * Update participation status.

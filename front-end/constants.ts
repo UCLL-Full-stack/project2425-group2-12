@@ -1,7 +1,7 @@
   export const roleRedirectPaths: Record<string, string> = {
     admin: "/dashboard",
     captain: "/teamManagement",
-    player: "/teamManagement",
+    player: "/playerLanding",
     spectator: "/reservation",
   };
   export const PLAYER_ROLES = [

@@ -1,6 +1,7 @@
 // components/TeamForm.tsx
 import { createTeam } from '@/service/teamService';
 import React, { useState } from 'react';
+import { getUserRole } from './withAuth';
 
 interface TeamFormProps {
   onTeamCreated: () => void; // Callback to refresh team list
@@ -9,6 +10,13 @@ interface TeamFormProps {
 const TeamForm: React.FC<TeamFormProps> = ({ onTeamCreated }) => {
   const [teamName, setTeamName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const userRole = getUserRole(); // Get user role
+
+  if (userRole === 'player') {
+    // Return null or an empty fragment if the user is a player
+    return null;
+  }
+
 
 
   const handleCreateTeam = async () => {

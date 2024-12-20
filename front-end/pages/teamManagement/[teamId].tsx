@@ -30,6 +30,18 @@ const TeamDetail = () => {
   const [joinRequests, setJoinRequests] = useState<any[]>([]);
   const [joinRequestStatus, setJoinRequestStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [selectedRoles, setSelectedRoles] = useState<{ [key: string]: "Batsman" | "Bowler" | "All-rounder" | "Wicket Keeper" }>({});
+  const [isPartOfTeam, setIsPartOfTeam] = useState(false); // New state to track if the player is part of the team
+
+
+
+  const handleRoleChange = (requestId: string, role: "Batsman" | "Bowler" | "All-rounder" | "Wicket Keeper") => {
+    setSelectedRoles((prevRoles) => ({
+      ...prevRoles,
+      [requestId]: role,
+    }));
+  };
+  
 
 
   useEffect(() => {
@@ -65,14 +77,28 @@ const TeamDetail = () => {
 
   const fetchRequests = async (teamId: string) => {
     try {
+      if (userRole !== "captain" && userRole !== "admin") {
+        console.log("User role does not allow fetching join requests. Skipping...");
+        return; // Exit early if the user is not authorized
+      }
+  
+      console.log("Fetching join requests for teamId:", teamId);
       const requests = await getJoinRequests(teamId);
-      setJoinRequests(requests); // Update join requests
+  
+      if (!Array.isArray(requests)) {
+        console.error("Invalid response for join requests:", requests);
+        return; // Exit if requests is not a valid array
+      }
+  
+      // Filter pending requests
+      const pendingRequests = requests.filter((request: any) => request.status === "pending");
+      setJoinRequests(pendingRequests); // Update state with only pending requests
     } catch (error) {
       console.error("Error fetching join requests:", error);
-      // You can use a temporary error state if `setError` is not defined
       alert("Failed to fetch join requests.");
     }
   };
+  
 
   useEffect(() => {
     if (!teamId) return;
@@ -140,47 +166,93 @@ const TeamDetail = () => {
   
 
 
-  
   const sendJoinRequest = async () => {
     try {
       const token = Cookies.get("authToken");
       if (!token) {
-        throw new Error("Authentication token not found.");
+        alert("You are not authenticated. Please log in.");
+        return;
       }
   
-      // Decode the token to extract `playerId` and `playerName`
+      if (isPartOfTeam) {
+        alert("You are already a member of this team.");
+        return;
+      }
+  
       const decodedToken: { playerId: string; playerName: string } = jwtDecode(token);
       const { playerId, playerName } = decodedToken;
   
       if (!playerId || !playerName) {
-        throw new Error("Player information is missing in the token.");
+        alert("Player information is missing. Please log in again.");
+        return;
       }
   
-      // Call the backend service
       await requestJoinTeam(teamId as string, playerId, playerName);
   
-      // Update UI state
       setJoinRequestStatus("pending");
       alert("Join request sent successfully!");
-    } catch (error) {
-      console.error("Error sending join request:", error);
-      alert("Failed to send join request.");
+    } catch (error: any) {
+      if (error.response) {
+        const backendMessage = error.response.data?.message;
+        if (backendMessage) {
+          alert(backendMessage); // Show backend message
+        } else {
+          alert("Failed to send join request. Please check your input and try again.");
+        }
+      } else {
+        console.error("Unexpected error:", error);
+        alert("Something went wrong. Please try again later.");
+      }
     }
   };
   
 
   const handleRequestAction = async (
     requestId: string,
-    status: "approved" | "denied"
+    status: "approved" | "denied",
+    role: "Batsman" | "Bowler" | "All-rounder" | "Wicket Keeper"
   ) => {
+    if (status === "approved" && !role) {
+      alert("Please select a role before approving the request.");
+      return;
+    }
     try {
-      await handleJoinRequest(teamId as string, requestId, status); // Service function
-      fetchRequests(teamId); // Refresh the request list
+      await handleJoinRequest(teamId as string, requestId, status, role || "");
+      await fetchRequests(teamId); // Refresh requests after status change
+      alert(`Request ${status} successfully!`);
     } catch (error) {
       console.error("Error handling join request:", error);
+      alert("Failed to process the join request. Please try again.");
     }
   };
+  
+  useEffect(() => {
+    const fetchTeam = async () => {
+      setLoading(true);
+      try {
+        const response = await getTeams();
+        const selectedTeam = response?.find((t: any) => t.id === teamId);
 
+        if (selectedTeam) {
+          const players = await getTeamPlayers(teamId);
+          const userPlayerId = Cookies.get('playerId'); // Assuming playerId is stored in cookies
+          const isPlayerInTeam = players.some((player: any) => player.id === userPlayerId);
+
+          setIsPartOfTeam(isPlayerInTeam); // Update state if player is in the team
+          setTeam({ ...selectedTeam, players });
+        }
+      } catch (error) {
+        console.error('Error fetching team:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (teamId) {
+      fetchTeam();
+    }
+  }, [teamId]);
+  
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h1 className="text-2xl font-bold mb-4">
@@ -188,7 +260,7 @@ const TeamDetail = () => {
       </h1>
 
       {/* Join Team Button */}
-{!team?.isCaptain && joinRequestStatus !== "pending" && (
+      {userRole === "player" && !isPartOfTeam && joinRequestStatus !== "pending" && (
   <button
     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-6"
     onClick={sendJoinRequest}
@@ -262,20 +334,44 @@ const TeamDetail = () => {
       </div>
 
       {/* Join Requests (Visible to Captains Only) */}
-      {userRole === "captain" || userRole === "admin" ? (
+      {(userRole === "captain" || userRole === "admin") && (
   <div className="mb-6">
     <h2 className="text-xl font-semibold mb-3">Pending Join Requests</h2>
     {joinRequests.length > 0 ? (
       joinRequests.map((request: any) => (
         <div key={request.id}>
           <span>{request.playerName}</span>
+          <select
+            onChange={(e) =>
+              handleRoleChange(
+                request.id,
+                e.target.value as "Batsman" | "Bowler" | "All-rounder" | "Wicket Keeper"
+              )
+            }
+            className="border rounded px-2 py-1"
+            value={selectedRoles[request.id] || ""}
+          >
+            <option value="">Select Role</option>
+            {["Batsman", "Bowler", "All-rounder", "Wicket Keeper"].map((role) => (
+              <option key={role} value={role}>
+                {role}
+              </option>
+            ))}
+          </select>
           <button
-            onClick={() => handleRequestAction(request.id, "approved")}
+            onClick={() =>
+              handleRequestAction(request.id, "approved", selectedRoles[request.id])
+            }
+            className="bg-green-500 hover:bg-green-700 text-white py-1 px-4 rounded"
+            disabled={!selectedRoles[request.id]} // Disable if no role selected
           >
             Approve
           </button>
           <button
-            onClick={() => handleRequestAction(request.id, "denied")}
+            onClick={() =>
+              handleRequestAction(request.id, "denied", selectedRoles[request.id])
+            }
+            className="bg-red-500 hover:bg-red-700 text-white py-1 px-4 rounded"
           >
             Deny
           </button>
@@ -285,7 +381,7 @@ const TeamDetail = () => {
       <p>No pending join requests.</p>
     )}
   </div>
-) : null}
+) }
 
 
       {/* Add New Player */}
