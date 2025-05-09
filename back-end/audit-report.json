@@ -1,0 +1,203 @@
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "@babel/helpers": {
+      "name": "@babel/helpers",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1104001,
+          "name": "@babel/helpers",
+          "dependency": "@babel/helpers",
+          "title": "Babel has inefficient RegExp complexity in generated code with .replace when transpiling named capturing groups",
+          "url": "https://github.com/advisories/GHSA-968p-4wvh-cqc8",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-1333"
+          ],
+          "cvss": {
+            "score": 6.2,
+            "vectorString": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          },
+          "range": "<7.26.10"
+        }
+      ],
+      "effects": [],
+      "range": "<7.26.10",
+      "nodes": [
+        "node_modules/@babel/helpers"
+      ],
+      "fixAvailable": true
+    },
+    "@babel/runtime": {
+      "name": "@babel/runtime",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1104000,
+          "name": "@babel/runtime",
+          "dependency": "@babel/runtime",
+          "title": "Babel has inefficient RegExp complexity in generated code with .replace when transpiling named capturing groups",
+          "url": "https://github.com/advisories/GHSA-968p-4wvh-cqc8",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-1333"
+          ],
+          "cvss": {
+            "score": 6.2,
+            "vectorString": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          },
+          "range": "<7.26.10"
+        }
+      ],
+      "effects": [],
+      "range": "<7.26.10",
+      "nodes": [
+        "node_modules/@babel/runtime"
+      ],
+      "fixAvailable": true
+    },
+    "@cyclonedx/cyclonedx-library": {
+      "name": "@cyclonedx/cyclonedx-library",
+      "severity": "critical",
+      "isDirect": false,
+      "via": [
+        "libxmljs2"
+      ],
+      "effects": [
+        "@cyclonedx/cyclonedx-npm"
+      ],
+      "range": ">=1.14.0-rc.0",
+      "nodes": [
+        "node_modules/@cyclonedx/cyclonedx-library"
+      ],
+      "fixAvailable": true
+    },
+    "@cyclonedx/cyclonedx-npm": {
+      "name": "@cyclonedx/cyclonedx-npm",
+      "severity": "critical",
+      "isDirect": false,
+      "via": [
+        "@cyclonedx/cyclonedx-library"
+      ],
+      "effects": [],
+      "range": ">=1.11.0",
+      "nodes": [
+        "node_modules/@cyclonedx/cyclonedx-npm"
+      ],
+      "fixAvailable": true
+    },
+    "libxmljs2": {
+      "name": "libxmljs2",
+      "severity": "critical",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1100657,
+          "name": "libxmljs2",
+          "dependency": "libxmljs2",
+          "title": "libxmljs2 vulnerable to type confusion when parsing specially crafted XML",
+          "url": "https://github.com/advisories/GHSA-78h3-pg4x-j8cv",
+          "severity": "critical",
+          "cwe": [
+            "CWE-843"
+          ],
+          "cvss": {
+            "score": 8.1,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"
+          },
+          "range": "<=0.35.0"
+        }
+      ],
+      "effects": [
+        "@cyclonedx/cyclonedx-library"
+      ],
+      "range": "*",
+      "nodes": [
+        "node_modules/libxmljs2"
+      ],
+      "fixAvailable": true
+    },
+    "nodemon": {
+      "name": "nodemon",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        "simple-update-notifier"
+      ],
+      "effects": [],
+      "range": "2.0.19 - 2.0.22",
+      "nodes": [
+        "node_modules/nodemon"
+      ],
+      "fixAvailable": true
+    },
+    "semver": {
+      "name": "semver",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1101088,
+          "name": "semver",
+          "dependency": "semver",
+          "title": "semver vulnerable to Regular Expression Denial of Service",
+          "url": "https://github.com/advisories/GHSA-c2qf-rxjj-qqgw",
+          "severity": "high",
+          "cwe": [
+            "CWE-1333"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          },
+          "range": ">=7.0.0 <7.5.2"
+        }
+      ],
+      "effects": [
+        "simple-update-notifier"
+      ],
+      "range": "7.0.0 - 7.5.1",
+      "nodes": [
+        "node_modules/simple-update-notifier/node_modules/semver"
+      ],
+      "fixAvailable": true
+    },
+    "simple-update-notifier": {
+      "name": "simple-update-notifier",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        "semver"
+      ],
+      "effects": [
+        "nodemon"
+      ],
+      "range": "1.0.7 - 1.1.0",
+      "nodes": [
+        "node_modules/simple-update-notifier"
+      ],
+      "fixAvailable": true
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 2,
+      "high": 3,
+      "critical": 3,
+      "total": 8
+    },
+    "dependencies": {
+      "prod": 196,
+      "dev": 467,
+      "optional": 158,
+      "peer": 1,
+      "peerOptional": 0,
+      "total": 666
+    }
+  }
+}

@@ -36,12 +36,14 @@
         "joi": "^17.13.3",
         "jsonwebtoken": "^9.0.2",
         "jwt-decode": "^4.0.0",
+        "pino": "^9.6.0",
         "swagger-jsdoc": "^6.2.8",
         "swagger-ui-express": "^4.6.3",
         "uuid": "^11.0.2",
         "zod": "^3.24.0"
     },
     "devDependencies": {
+        "@cyclonedx/bom": "^4.1.0",
         "@jest/globals": "^29.7.0",
         "@types/bcrypt": "^5.0.0",
         "@types/body-parser": "^1.19.0",
@@ -51,6 +53,7 @@
         "@types/joi": "^17.2.2",
         "@types/jsonwebtoken": "^9.0.7",
         "@types/node": "^18.19.64",
+        "@types/pino": "^7.0.4",
         "@types/swagger-jsdoc": "^6.0.4",
         "@types/swagger-ui-express": "^4.1.6",
         "@types/uuid": "^10.0.0",

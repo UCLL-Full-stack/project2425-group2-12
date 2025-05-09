@@ -9,6 +9,7 @@ import reservationRoutes from './routes/reservationRoutes';
 import participationRoutes from './routes/participationRoutes';
 import { setupSwagger } from './swagger';
 import { seedDatabase } from './repository/prisma/seed';
+import logger from './util/logger';
 
 
 import profileRoutes from './routes/profileRoutes';
@@ -100,5 +101,12 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+// Middleware for logging requests
+app.use((req, res, next) => {
+  logger.info('Server is starting...');;
+  next();
+});
+
 
 export default app;

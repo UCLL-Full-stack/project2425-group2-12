@@ -35,7 +35,11 @@ export const registerUserController = async (
       },
     });
 
-    res.status(201).json({ message: 'User registered successfully', user });
+    res.status(201).json({ 
+      message: 'User registered successfully', 
+      user: { id: user.id, email: user.email, role: user.role } 
+    });
+    
   } catch (error) {
     console.error('Error during registration:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -45,18 +49,26 @@ export const registerUserController = async (
 export const loginUserController = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
+    console.log("Login attempt with:", email);
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
+      console.warn("User not found.");
       return res.status(401).json({ message: 'Invalid email or password.' });
     }
 
+    console.log("User found:", { id: user.id, role: user.role });
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log("🔍 Password match:", isPasswordValid);
+
     if (!isPasswordValid) {
+      console.warn("Invalid password.");
       return res.status(401).json({ message: 'Invalid email or password.' });
     }
 
     if (user.status === 'suspended') {
+      console.warn("⚠️ Account suspended:", email);
       return res.status(403).json({ message: 'Account suspended. Please contact support.' });
     }
 
@@ -68,19 +80,44 @@ export const loginUserController = async (req: Request, res: Response) => {
           playerId: player.id,
           playerName: player.name,
         };
+        console.log("Player details:", playerDetails);
       }
     }
 
-    // Include player details in the JWT token if applicable
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET not defined in environment variables");
+    }
+
     const token = jwt.sign(
       { id: user.id, role: user.role, ...playerDetails },
-      process.env.JWT_SECRET!,
+      process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-    res.status(200).json({ token });
+
+    console.log("JWT created:", token);
+
+    res
+      .cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .status(200)
+      .json({ message: 'Login successful' });
+
   } catch (error) {
     console.error('Error during login:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
+};
+
+export const logoutUserController = (req: Request, res: Response) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+  });
+  res.status(200).json({ message: 'Logged out successfully' });
 };
 

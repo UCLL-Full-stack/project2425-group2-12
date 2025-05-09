@@ -1,8 +1,17 @@
 // src/routes/authRoutes.js
 import express from 'express';
-import { validateRegistrationWithZod } from '../middleware/validationMiddleware';
-import { loginUserController, registerUserController } from '../controller/authController';
+import {
+  registerUserController,
+  loginUserController,
+  logoutUserController
+} from '../controller/authController';
+import {
+  validateBody,
+  registrationSchema,
+  loginSchema,
+} from '../middleware/validationMiddleware';
 
+  
 /**
  * @swagger
  * /auth/register:
@@ -102,13 +111,27 @@ import { loginUserController, registerUserController } from '../controller/authC
  *       500:
  *         description: Internal server error.
  */
+
+/**
+ * @swagger
+ * /auth/logout:
+ *   post:
+ *     summary: Log out a user
+ *     description: Clears the user's authentication cookie, ending the session.
+ *     responses:
+ *       200:
+ *         description: Logout successful.
+ *       500:
+ *         description: Internal server error.
+ */
+
 const router = express.Router();
 
 
 
 // Registration route
-router.post('/register', validateRegistrationWithZod, registerUserController);
-
-router.post('/login', loginUserController);
+router.post('/register', validateBody(registrationSchema), registerUserController);
+router.post('/login', validateBody(loginSchema), loginUserController);
+router.post('/logout', logoutUserController);
 
 export default router;
